@@ -1,0 +1,238 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #e9efe9;
+}
+
+/* ==========================================
+   1. MÀN HÌNH ĐĂNG NHẬP (LOGIN CONTAINER)
+   ========================================== */
+.login-container {
+    background: white;
+    padding: 35px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    text-align: center;
+    width: 360px;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    background: white;
+    color: #444;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.google-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.google-btn:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* ==========================================
+   2. KHUNG CHAT TỔNG THỂ (CHAT CONTAINER)
+   ========================================== */
+.chat-container {
+    width: 420px;
+    height: 600px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: #0084ff;
+    color: #ffffff;
+    padding: 14px 16px;
+}
+
+.chat-header h2 {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85em;
+    margin-top: 6px;
+}
+
+.logout-btn {
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    font-size: 0.8em;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    width: auto;
+    transition: background 0.2s;
+}
+
+.logout-btn:hover {
+    background: #d9363e;
+}
+
+/* Khu vực hiển thị tin nhắn */
+.chat-box {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #f7f9fa;
+}
+
+/* ==========================================
+   3. ĐỊNH DẠNG TIN NHẮN & NÚT THU HỒI
+   ========================================== */
+.message-item {
+    background: #ffffff;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+    width: fit-content;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    word-break: break-word;
+    border: 1px solid #e4e6eb;
+    align-self: flex-start; /* Mặc định tin nhắn người khác nằm bên trái */
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.message-user {
+    font-weight: bold;
+    color: #0084ff;
+    font-size: 0.8em;
+}
+
+.message-text {
+    color: #333333;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+/* Tin nhắn của chính mình (nằm bên phải màu xanh) */
+.my-message {
+    align-self: flex-end;
+    background-color: #0084ff;
+    color: white;
+    border: none;
+}
+
+.my-message .message-user {
+    color: #e0e0e0;
+}
+
+.my-message .message-text {
+    color: white;
+}
+
+/* Nút Thu hồi tin nhắn (Nút ✕) */
+.delete-btn {
+    background: transparent;
+    color: #999;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0 4px;
+    width: auto;
+    line-height: 1;
+    border-radius: 50%;
+    display: none; /* Mặc định ẩn, khi rê chuột vào tin nhắn mới hiện */
+}
+
+.message-item:hover .delete-btn {
+    display: inline-block;
+}
+
+.delete-btn:hover {
+    color: #ff4d4f;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.my-message .delete-btn {
+    color: #e0e0e0;
+}
+
+.my-message .delete-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================
+   4. Ô NHẬP TIN NHẮN (INPUT AREA)
+   ========================================== */
+.chat-input-area {
+    padding: 12px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 8px;
+    background: #ffffff;
+}
+
+.input-msg {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    font-size: 0.95em;
+}
+
+.input-msg:focus {
+    border-color: #0084ff;
+}
+
+button#sendBtn {
+    width: 20%;
+    background: #0084ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+button#sendBtn:hover {
+    background: #006bce;
+}

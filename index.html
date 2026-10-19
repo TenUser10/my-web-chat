@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyChat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Màn hình Đăng nhập -->
+    <div id="loginContainer" class="login-container">
+        <h2>Đăng Nhập MyChat</h2>
+        <p style="margin-top: 8px; color: #666;">Vui lòng đăng nhập để bắt đầu trò chuyện</p>
+        <button id="googleLoginBtn" class="google-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+            Đăng nhập bằng Google
+        </button>
+    </div>
+
+    <!-- Khung Chat -->
+    <div id="chatContainer" class="chat-container" style="display: none;">
+        <div class="chat-header">
+            <h2>MyChat</h2>
+            <div class="user-info">
+                <span id="userDisplayName"></span>
+                <button id="logoutBtn" class="logout-btn">Thoát</button>
+            </div>
+        </div>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="chat-input-area">
+            <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." class="input-msg">
+            <button id="sendBtn">Gửi</button>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
