@@ -236,3 +236,28 @@ button#sendBtn {
 button#sendBtn:hover {
     background: #006bce;
 }
+/* Nhãn Admin nổi bật */
+.admin-badge {
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.admin-tag {
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    font-weight: bold;
+}
+
+.my-message .admin-tag {
+    background-color: #ffffff;
+    color: #0084ff;
+}
