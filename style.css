@@ -13,9 +13,7 @@ body {
     background-color: #e9efe9;
 }
 
-/* ==========================================
-   1. MÀN HÌNH ĐĂNG NHẬP (LOGIN CONTAINER)
-   ========================================== */
+/* 1. MÀN HÌNH ĐĂNG NHẬP */
 .login-container {
     background: white;
     padding: 35px 30px;
@@ -53,9 +51,7 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* ==========================================
-   2. KHUNG CHAT TỔNG THỂ (CHAT CONTAINER)
-   ========================================== */
+/* 2. KHUNG CHAT TỔNG THỂ */
 .chat-container {
     width: 420px;
     height: 600px;
@@ -115,9 +111,7 @@ body {
     background-color: #f7f9fa;
 }
 
-/* ==========================================
-   3. ĐỊNH DẠNG TIN NHẮN & NÚT THU HỒI
-   ========================================== */
+/* 3. ĐỊNH DẠNG TIN NHẮN & NÚT THU HỒI */
 .message-item {
     background: #ffffff;
     padding: 8px 12px;
@@ -127,7 +121,7 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     word-break: break-word;
     border: 1px solid #e4e6eb;
-    align-self: flex-start; /* Mặc định tin nhắn người khác nằm bên trái */
+    align-self: flex-start;
 }
 
 .message-header {
@@ -150,7 +144,7 @@ body {
     line-height: 1.4;
 }
 
-/* Tin nhắn của chính mình (nằm bên phải màu xanh) */
+/* Tin nhắn cá nhân */
 .my-message {
     align-self: flex-end;
     background-color: #0084ff;
@@ -177,7 +171,7 @@ body {
     width: auto;
     line-height: 1;
     border-radius: 50%;
-    display: none; /* Mặc định ẩn, khi rê chuột vào tin nhắn mới hiện */
+    display: none;
 }
 
 .message-item:hover .delete-btn {
@@ -198,9 +192,33 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* ==========================================
-   4. Ô NHẬP TIN NHẮN (INPUT AREA)
-   ========================================== */
+/* 4. ĐỊNH DẠNG NHÃN ADMIN */
+.admin-badge {
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.admin-tag {
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    font-weight: bold;
+}
+
+.my-message .admin-tag {
+    background-color: #ffffff;
+    color: #0084ff;
+}
+
+/* 5. Ô NHẬP TIN NHẮN */
 .chat-input-area {
     padding: 12px;
     border-top: 1px solid #eee;
@@ -235,29 +253,4 @@ button#sendBtn {
 
 button#sendBtn:hover {
     background: #006bce;
-}
-/* Nhãn Admin nổi bật */
-.admin-badge {
-    background-color: #ff4d4f;
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: 5px;
-    font-weight: bold;
-}
-
-.admin-tag {
-    background-color: #ff4d4f;
-    color: white;
-    font-size: 9px;
-    padding: 1px 5px;
-    border-radius: 8px;
-    margin-left: 4px;
-    font-weight: bold;
-}
-
-.my-message .admin-tag {
-    background-color: #ffffff;
-    color: #0084ff;
 }

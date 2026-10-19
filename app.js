@@ -10,6 +10,7 @@ import {
     browserLocalPersistence 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+// Cấu hình Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCW3QFL9v94INRWsER4Ql8qDOjtypRXpiQ",
   authDomain: "my-web-chat-bf87d.firebaseapp.com",
@@ -29,6 +30,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const messagesRef = ref(db, 'messages');
 
+// Tự động duy trì phiên đăng nhập trên thiết bị
 setPersistence(auth, browserLocalPersistence);
 
 const loginContainer = document.getElementById('loginContainer');
@@ -43,7 +45,7 @@ const sendBtn = document.getElementById('sendBtn');
 
 let currentUser = null;
 
-// Đăng nhập Google
+// Đăng nhập bằng Google
 googleLoginBtn.addEventListener('click', () => {
     signInWithPopup(auth, provider).catch((error) => {
         console.error("Lỗi đăng nhập:", error);
@@ -62,7 +64,9 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         const isAdmin = user.email === ADMIN_EMAIL;
-        userDisplayName.innerHTML = `${user.displayName} ${isAdmin ? '<span class="admin-badge">Admin</span>' : ''}`;
+        const displayName = isAdmin ? "Út Gà" : user.displayName;
+
+        userDisplayName.innerHTML = `${displayName} ${isAdmin ? '<span class="admin-badge">Admin</span>' : ''}`;
         loginContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
     } else {
@@ -77,10 +81,13 @@ function sendMessage() {
     const message = messageInput.value.trim();
 
     if (message !== '' && currentUser) {
+        const isAdmin = currentUser.email === ADMIN_EMAIL;
+        const displayName = isAdmin ? "Út Gà" : currentUser.displayName;
+
         push(messagesRef, {
             uid: currentUser.uid,
             email: currentUser.email,
-            username: currentUser.displayName,
+            username: displayName,
             text: message,
             timestamp: Date.now()
         });
@@ -93,7 +100,7 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// Lắng nghe tin nhắn mới
+// Lắng nghe tin nhắn mới từ Firebase
 onChildAdded(messagesRef, (snapshot) => {
     const data = snapshot.val();
     const messageKey = snapshot.key;
@@ -106,7 +113,7 @@ onChildAdded(messagesRef, (snapshot) => {
     msgElement.setAttribute('id', `msg-${messageKey}`);
     if (isMe) msgElement.classList.add('my-message');
 
-    // Admin có quyền xóa TẤT CẢ tin nhắn, người dùng thường chỉ được xóa tin nhắn của chính mình
+    // Admin được quyền xóa mọi tin nhắn, người dùng thường chỉ xóa tin nhắn của mình
     const canDelete = isMe || isCurrentAdmin;
     const deleteBtnHtml = canDelete ? `<button class="delete-btn" title="Xóa tin nhắn" data-key="${messageKey}">✕</button>` : '';
     const adminBadgeHtml = isMsgAdmin ? '<span class="admin-tag">Admin</span>' : '';
@@ -133,7 +140,7 @@ onChildAdded(messagesRef, (snapshot) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// Lắng nghe tin nhắn bị xóa
+// Lắng nghe khi tin nhắn bị xóa
 onChildRemoved(messagesRef, (snapshot) => {
     const messageKey = snapshot.key;
     const msgElement = document.getElementById(`msg-${messageKey}`);
