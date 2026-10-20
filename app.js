@@ -65,8 +65,13 @@ onAuthStateChanged(auth, (user) => {
         currentUser = user;
         const isAdmin = user.email === ADMIN_EMAIL;
         const displayName = isAdmin ? "Út Gà" : user.displayName;
+        const avatarUrl = user.photoURL || "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
 
-        userDisplayName.innerHTML = `${displayName} ${isAdmin ? '<span class="admin-badge">Admin</span>' : ''}`;
+        userDisplayName.innerHTML = `
+            <img src="${avatarUrl}" class="header-avatar" alt="Avatar">
+            <span>${displayName}</span>
+            ${isAdmin ? '<span class="admin-badge">Admin</span>' : ''}
+        `;
         loginContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
     } else {
@@ -83,11 +88,13 @@ function sendMessage() {
     if (message !== '' && currentUser) {
         const isAdmin = currentUser.email === ADMIN_EMAIL;
         const displayName = isAdmin ? "Út Gà" : currentUser.displayName;
+        const avatarUrl = currentUser.photoURL || "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
 
         push(messagesRef, {
             uid: currentUser.uid,
             email: currentUser.email,
             username: displayName,
+            avatar: avatarUrl,
             text: message,
             timestamp: Date.now()
         });
@@ -107,20 +114,24 @@ onChildAdded(messagesRef, (snapshot) => {
     const isMe = currentUser && data.uid === currentUser.uid;
     const isCurrentAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
     const isMsgAdmin = data.email === ADMIN_EMAIL;
+    const avatarUrl = data.avatar || "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
 
     const msgElement = document.createElement('div');
     msgElement.classList.add('message-item');
     msgElement.setAttribute('id', `msg-${messageKey}`);
     if (isMe) msgElement.classList.add('my-message');
 
-    // Admin được quyền xóa mọi tin nhắn, người dùng thường chỉ xóa tin nhắn của mình
     const canDelete = isMe || isCurrentAdmin;
     const deleteBtnHtml = canDelete ? `<button class="delete-btn" title="Xóa tin nhắn" data-key="${messageKey}">✕</button>` : '';
     const adminBadgeHtml = isMsgAdmin ? '<span class="admin-tag">Admin</span>' : '';
 
     msgElement.innerHTML = `
         <div class="message-header">
-            <span class="message-user">${data.username} ${adminBadgeHtml}</span>
+            <div class="user-profile">
+                <img src="${avatarUrl}" class="msg-avatar" alt="Avatar">
+                <span class="message-user">${data.username}</span>
+                ${adminBadgeHtml}
+            </div>
             ${deleteBtnHtml}
         </div>
         <div class="message-text">${data.text}</div>

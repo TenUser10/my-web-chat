@@ -254,3 +254,33 @@ button#sendBtn {
 button#sendBtn:hover {
     background: #006bce;
 }
+/* Avatar trên thanh Header */
+.header-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Avatar kế bên tên người nhắn trong khung chat */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.msg-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+}
