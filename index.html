@@ -17,8 +17,9 @@
         </button>
     </div>
 
-    <!-- Khung Chat -->
+    <!-- Khung Chat chính -->
     <div id="chatContainer" class="chat-container" style="display: none;">
+        <!-- Thanh tiêu đề Header -->
         <div class="chat-header">
             <h2>MyChat</h2>
             <div class="user-info">
@@ -26,13 +27,23 @@
                 <button id="logoutBtn" class="logout-btn">Thoát</button>
             </div>
         </div>
+
+        <!-- Khu vực hiển thị tin nhắn -->
         <div class="chat-box" id="chatBox"></div>
+
+        <!-- Thanh nhập tin nhắn & Gửi ảnh -->
         <div class="chat-input-area">
+            <!-- Nút đính kèm hình ảnh 📷 -->
+            <label for="imageInput" class="image-upload-btn" title="Gửi hình ảnh">📷</label>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            
+            <!-- Ô nhập nội dung tin nhắn -->
             <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." class="input-msg">
             <button id="sendBtn">Gửi</button>
         </div>
     </div>
 
+    <!-- Script chính -->
     <script type="module" src="app.js"></script>
 </body>
 </html>

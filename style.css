@@ -82,6 +82,17 @@ body {
     margin-top: 6px;
 }
 
+/* Avatar trên thanh Header */
+.header-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
 .logout-btn {
     background: #ff4d4f;
     color: white;
@@ -111,7 +122,7 @@ body {
     background-color: #f7f9fa;
 }
 
-/* 3. ĐỊNH DẠNG TIN NHẮN & NÚT THU HỒI */
+/* 3. ĐỊNH DẠNG TIN NHẮN & AVATAR */
 .message-item {
     background: #ffffff;
     padding: 8px 12px;
@@ -132,6 +143,22 @@ body {
     margin-bottom: 3px;
 }
 
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.msg-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #ffffff;
+    padding: 1px;
+    flex-shrink: 0;
+}
+
 .message-user {
     font-weight: bold;
     color: #0084ff;
@@ -144,7 +171,31 @@ body {
     line-height: 1.4;
 }
 
-/* Tin nhắn cá nhân */
+/* Hiển thị hình ảnh gửi trong tin nhắn */
+.chat-img {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 8px;
+    margin-top: 5px;
+    cursor: pointer;
+    display: block;
+    object-fit: cover;
+    transition: opacity 0.2s;
+}
+
+.chat-img:hover {
+    opacity: 0.9;
+}
+
+/* Mốc thời gian gửi tin nhắn */
+.message-time {
+    font-size: 0.7em;
+    color: #888888;
+    text-align: right;
+    margin-top: 3px;
+}
+
+/* Tin nhắn của bản thân */
 .my-message {
     align-self: flex-end;
     background-color: #0084ff;
@@ -160,7 +211,11 @@ body {
     color: white;
 }
 
-/* Nút Thu hồi tin nhắn (Nút ✕) */
+.my-message .message-time {
+    color: #e0e0e0;
+}
+
+/* Nút Thu hồi/Xóa tin nhắn (✕) */
 .delete-btn {
     background: transparent;
     color: #999;
@@ -218,13 +273,30 @@ body {
     color: #0084ff;
 }
 
-/* 5. Ô NHẬP TIN NHẮN */
+/* 5. Ô NHẬP TIN NHẮN & NÚT GỬI ĐÍNH KÈM */
 .chat-input-area {
     padding: 12px;
     border-top: 1px solid #eee;
     display: flex;
+    align-items: center;
     gap: 8px;
     background: #ffffff;
+}
+
+/* Nút icon gửi ảnh 📷 */
+.image-upload-btn {
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    user-select: none;
+    transition: transform 0.15s;
+}
+
+.image-upload-btn:hover {
+    transform: scale(1.2);
 }
 
 .input-msg {
@@ -245,6 +317,7 @@ button#sendBtn {
     background: #0084ff;
     color: white;
     border: none;
+    padding: 10px 0;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
@@ -253,34 +326,4 @@ button#sendBtn {
 
 button#sendBtn:hover {
     background: #006bce;
-}
-/* Avatar trên thanh Header */
-.header-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 6px;
-    vertical-align: middle;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* Avatar kế bên tên người nhắn trong khung chat */
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.msg-avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    object-fit: cover;
 }
