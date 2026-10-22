@@ -40,18 +40,12 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.error('Lỗi Service Worker:', err));
 }
 
-// Xin quyền thông báo trên iPhone, Android và Windows
-function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission !== 'granted') {
-        Notification.requestPermission();
-    }
-}
-
 const loginContainer = document.getElementById('loginContainer');
 const chatContainer = document.getElementById('chatContainer');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const userDisplayName = document.getElementById('userDisplayName');
+const enableNotifBtn = document.getElementById('enableNotifBtn');
 
 const chatBox = document.getElementById('chatBox');
 const messageInput = document.getElementById('messageInput');
@@ -60,6 +54,30 @@ const imageInput = document.getElementById('imageInput');
 
 let currentUser = null;
 let isFirstLoad = true; // Chống phát tiếng cho tin nhắn cũ khi vừa tải ứng dụng
+
+// Hàm kích hoạt xin quyền thông báo khi bấm nút 🔔
+if (enableNotifBtn) {
+    enableNotifBtn.addEventListener('click', () => {
+        // Phát tiếng thử ngắn để kích hoạt quyền audio
+        notifSound.play().then(() => {
+            notifSound.pause();
+            notifSound.currentTime = 0;
+        }).catch(() => {});
+
+        if ('Notification' in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    alert('Đã bật thông báo và âm thanh thành công!');
+                    enableNotifBtn.style.display = 'none';
+                } else if (permission === 'denied') {
+                    alert('Bạn đã chặn thông báo. Vui lòng bấm vào icon ổ khóa 🔒 ở thanh địa chỉ web để bật lại!');
+                }
+            });
+        } else {
+            alert('Trình duyệt của bạn không hỗ trợ thông báo Web Push!');
+        }
+    });
+}
 
 function getGoogleAvatar(user) {
     if (user && user.photoURL && user.photoURL !== '' && !user.photoURL.includes('gstatic.com')) {
@@ -70,9 +88,7 @@ function getGoogleAvatar(user) {
 }
 
 googleLoginBtn.addEventListener('click', () => {
-    signInWithPopup(auth, provider).then(() => {
-        requestNotificationPermission();
-    }).catch((error) => console.error("Lỗi đăng nhập:", error));
+    signInWithPopup(auth, provider).catch((error) => console.error("Lỗi đăng nhập:", error));
 });
 
 logoutBtn.addEventListener('click', () => {
@@ -82,8 +98,12 @@ logoutBtn.addEventListener('click', () => {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
-        requestNotificationPermission();
         
+        // Ẩn nút thông báo nếu đã được cấp quyền trước đó
+        if ('Notification' in window && Notification.permission === 'granted') {
+            if (enableNotifBtn) enableNotifBtn.style.display = 'none';
+        }
+
         const isAdmin = user.email === ADMIN_EMAIL;
         const displayName = isAdmin ? "Út Gà" : user.displayName;
         const avatarUrl = getGoogleAvatar(user);
@@ -175,7 +195,7 @@ imageInput.addEventListener('change', async (e) => {
     }
 });
 
-// Lắng nghe tin nhắn mới & Hiển thị / Phát thông báo âm thanh
+// Lắng nghe tin nhắn mới & Phát thông báo âm thanh
 onChildAdded(messagesRef, (snapshot) => {
     const data = snapshot.val();
     const messageKey = snapshot.key;
