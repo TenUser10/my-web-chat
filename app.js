@@ -21,7 +21,6 @@ const firebaseConfig = {
   measurementId: "G-FDW226J47G"
 };
 
-// API Key ImgBB của bạn
 const IMGBB_API_KEY = "71693e3ac11a8bacb4a8c7b645ce5b3f";
 const ADMIN_EMAIL = "mycaphe19@gmail.com";
 
@@ -32,6 +31,21 @@ const provider = new GoogleAuthProvider();
 const messagesRef = ref(db, 'messages');
 
 setPersistence(auth, browserLocalPersistence);
+
+// Tạo đối tượng phát âm thanh "tinh tinh"
+const notifSound = new Audio('notification.mp3');
+
+// Đăng ký Service Worker cho Push Notification
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(err => console.error('Lỗi Service Worker:', err));
+}
+
+// Xin quyền thông báo trên iPhone, Android và Windows
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+    }
+}
 
 const loginContainer = document.getElementById('loginContainer');
 const chatContainer = document.getElementById('chatContainer');
@@ -45,6 +59,7 @@ const sendBtn = document.getElementById('sendBtn');
 const imageInput = document.getElementById('imageInput');
 
 let currentUser = null;
+let isFirstLoad = true; // Chống phát tiếng cho tin nhắn cũ khi vừa tải ứng dụng
 
 function getGoogleAvatar(user) {
     if (user && user.photoURL && user.photoURL !== '' && !user.photoURL.includes('gstatic.com')) {
@@ -55,7 +70,9 @@ function getGoogleAvatar(user) {
 }
 
 googleLoginBtn.addEventListener('click', () => {
-    signInWithPopup(auth, provider).catch((error) => console.error("Lỗi đăng nhập:", error));
+    signInWithPopup(auth, provider).then(() => {
+        requestNotificationPermission();
+    }).catch((error) => console.error("Lỗi đăng nhập:", error));
 });
 
 logoutBtn.addEventListener('click', () => {
@@ -65,6 +82,8 @@ logoutBtn.addEventListener('click', () => {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
+        requestNotificationPermission();
+        
         const isAdmin = user.email === ADMIN_EMAIL;
         const displayName = isAdmin ? "Út Gà" : user.displayName;
         const avatarUrl = getGoogleAvatar(user);
@@ -110,7 +129,7 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// Tải ảnh lên ImgBB bằng API Key của bạn
+// Gửi hình ảnh
 imageInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
@@ -132,7 +151,7 @@ imageInput.addEventListener('change', async (e) => {
         const result = await response.json();
 
         if (result.success) {
-            const imageUrl = result.data.url;
+            const imageUrl = result.data.display_url || result.data.url;
             const isAdmin = currentUser.email === ADMIN_EMAIL;
             const displayName = isAdmin ? "Út Gà" : currentUser.displayName;
             const avatarUrl = getGoogleAvatar(currentUser);
@@ -148,15 +167,15 @@ imageInput.addEventListener('change', async (e) => {
             });
             imageInput.value = '';
         } else {
-            alert('Lỗi tải ảnh lên ImgBB!');
+            alert('Lỗi tải ảnh lên dịch vụ lưu trữ!');
         }
     } catch (error) {
         console.error("Lỗi:", error);
-        alert("Không thể tải ảnh, vui lòng thử lại!");
+        alert("Không thể gửi ảnh, vui lòng thử lại!");
     }
 });
 
-// Hiển thị tin nhắn
+// Lắng nghe tin nhắn mới & Hiển thị / Phát thông báo âm thanh
 onChildAdded(messagesRef, (snapshot) => {
     const data = snapshot.val();
     const messageKey = snapshot.key;
@@ -179,7 +198,11 @@ onChildAdded(messagesRef, (snapshot) => {
 
     let contentHtml = '';
     if (data.imageUrl) {
-        contentHtml = `<img src="${data.imageUrl}" class="chat-img" alt="Hình ảnh" onclick="window.open('${data.imageUrl}', '_blank')">`;
+        contentHtml = `
+            <a href="${data.imageUrl}" target="_blank" rel="noopener noreferrer">
+                <img src="${data.imageUrl}" class="chat-img" alt="Hình ảnh" crossOrigin="anonymous" loading="lazy">
+            </a>
+        `;
     } else {
         contentHtml = `<div class="message-text">${data.text}</div>`;
     }
@@ -209,7 +232,35 @@ onChildAdded(messagesRef, (snapshot) => {
 
     chatBox.appendChild(msgElement);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Phát âm thanh tinh tinh và đẩy thông báo Push
+    if (!isMe && !isFirstLoad) {
+        notifSound.play().catch(e => console.log('Cần tương tác người dùng để phát âm thanh'));
+
+        if ('Notification' in window && Notification.permission === 'granted') {
+            const bodyText = data.imageUrl ? '[Đã gửi một hình ảnh]' : data.text;
+            
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(`MyChat - ${data.username}`, {
+                        body: bodyText,
+                        icon: avatarUrl,
+                        badge: avatarUrl
+                    });
+                });
+            } else {
+                new Notification(`MyChat - ${data.username}`, {
+                    body: bodyText,
+                    icon: avatarUrl
+                });
+            }
+        }
+    }
 });
+
+setTimeout(() => {
+    isFirstLoad = false;
+}, 2000);
 
 onChildRemoved(messagesRef, (snapshot) => {
     const messageKey = snapshot.key;
