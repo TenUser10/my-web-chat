@@ -13,7 +13,6 @@ body {
     background-color: #e9efe9;
 }
 
-/* 1. MÀN HÌNH ĐĂNG NHẬP */
 .login-container {
     background: white;
     padding: 35px 30px;
@@ -51,7 +50,6 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* 2. KHUNG CHAT TỔNG THỂ */
 .chat-container {
     width: 420px;
     height: 600px;
@@ -107,7 +105,35 @@ body {
     flex-shrink: 0;
 }
 
-/* Các nút chức năng trên Header (Đảm bảo luôn bấm được) */
+/* Thanh chuyển đổi phòng chat (Tabs) */
+.room-tabs {
+    display: flex;
+    background: #f0f2f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.room-tab {
+    flex: 1;
+    padding: 10px;
+    background: #f0f2f5;
+    border: none;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.room-tab:hover {
+    background: #e4e6eb;
+}
+
+.room-tab.active {
+    background: #ffffff;
+    color: #0084ff;
+    border-bottom: 2px solid #0084ff;
+}
+
 .profile-btn, .lang-selector, .notif-btn, .logout-btn {
     cursor: pointer;
     border-radius: 4px;
@@ -117,43 +143,17 @@ body {
     border: none;
     outline: none;
     transition: background 0.2s;
-    z-index: 15; /* Nổi lên trên cùng */
+    z-index: 15;
 }
 
-.profile-btn {
-    background: #f0f2f5;
-    color: #333;
-}
+.profile-btn { background: #f0f2f5; color: #333; }
+.profile-btn:hover { background: #e4e6eb; }
+.lang-selector { background: #ffffff; color: #333; border: 1px solid #ccc; }
+.notif-btn { background: #ffc107; color: #333; }
+.notif-btn:hover { background: #e0a800; }
+.logout-btn { background: #ff4d4f; color: white; }
+.logout-btn:hover { background: #d9363e; }
 
-.profile-btn:hover {
-    background: #e4e6eb;
-}
-
-.lang-selector {
-    background: #ffffff;
-    color: #333;
-    border: 1px solid #ccc;
-}
-
-.notif-btn {
-    background: #ffc107;
-    color: #333;
-}
-
-.notif-btn:hover {
-    background: #e0a800;
-}
-
-.logout-btn {
-    background: #ff4d4f;
-    color: white;
-}
-
-.logout-btn:hover {
-    background: #d9363e;
-}
-
-/* Khu vực hiển thị tin nhắn */
 .chat-box {
     flex: 1;
     padding: 16px;
@@ -238,17 +238,9 @@ body {
     border: none;
 }
 
-.my-message .message-user {
-    color: #e0e0e0;
-}
-
-.my-message .message-text {
-    color: white;
-}
-
-.my-message .message-time {
-    color: #e0e0e0;
-}
+.my-message .message-user { color: #e0e0e0; }
+.my-message .message-text { color: white; }
+.my-message .message-time { color: #e0e0e0; }
 
 .delete-btn {
     background: transparent;
@@ -287,7 +279,6 @@ body {
     font-weight: bold;
 }
 
-/* Ô nhập tin nhắn */
 .chat-input-area {
     padding: 12px;
     border-top: 1px solid #eee;
@@ -327,7 +318,6 @@ button#sendBtn {
     font-weight: bold;
 }
 
-/* 6. MODAL CÀI ĐẶT HỒ SƠ */
 .modal {
     position: fixed;
     top: 0; left: 0;
@@ -350,66 +340,12 @@ button#sendBtn {
     gap: 12px;
 }
 
-.modal-content h3 {
-    text-align: center;
-    color: #333;
-}
-
-.profile-preview-container {
-    display: flex;
-    justify-content: center;
-}
-
-.modal-avatar-preview {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #0084ff;
-}
-
-.modal-label {
-    font-size: 0.85em;
-    font-weight: 600;
-    color: #555;
-}
-
-.modal-input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 0.9em;
-    outline: none;
-}
-
-.modal-file-input {
-    font-size: 0.85em;
-}
-
-.modal-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.modal-save-btn {
-    flex: 1;
-    background: #0084ff;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.modal-close-btn {
-    flex: 1;
-    background: #ccc;
-    color: #333;
-    border: none;
-    padding: 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-}
+.modal-content h3 { text-align: center; color: #333; }
+.profile-preview-container { display: flex; justify-content: center; }
+.modal-avatar-preview { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #0084ff; }
+.modal-label { font-size: 0.85em; font-weight: 600; color: #555; }
+.modal-input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9em; outline: none; }
+.modal-file-input { font-size: 0.85em; }
+.modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
+.modal-save-btn { flex: 1; background: #0084ff; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.modal-close-btn { flex: 1; background: #ccc; color: #333; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }

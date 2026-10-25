@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, remove, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, remove, onChildAdded, onChildRemoved, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { 
     getAuth, 
     signInWithPopup, 
@@ -27,7 +27,6 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-const messagesRef = ref(db, 'messages');
 
 setPersistence(auth, browserLocalPersistence);
 
@@ -37,14 +36,16 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.error('Lỗi Service Worker:', err));
 }
 
-// BỘ TỪ ĐIỂN ĐA NGÔN NGỮ
 let currentLang = 'en';
+let currentRoom = 'family'; // Mặc định là phòng Family Chat
+let currentMessagesRef = null;
+
 const translations = {
     en: {
         loginTitle: "Sign in to MyChat",
         loginSubtitle: "Please sign in to start chatting",
         loginBtnText: "Sign in with Google",
-        enableNotif: "🔔 Turn on Notifications",
+        enableNotif: "🔔 Turn on",
         logout: "Logout",
         msgPlaceholder: "Type a message...",
         send: "Send",
@@ -111,7 +112,9 @@ const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const imageInput = document.getElementById('imageInput');
 
-// Elements Modal Profile
+const tabFamily = document.getElementById('tabFamily');
+const tabGame = document.getElementById('tabGame');
+
 const openProfileBtn = document.getElementById('openProfileBtn');
 const profileModal = document.getElementById('profileModal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -124,7 +127,6 @@ const previewAvatar = document.getElementById('previewAvatar');
 let currentUser = null;
 let isFirstLoad = true;
 
-// Lưu trữ thông tin tùy chỉnh cục bộ (Custom Profile)
 function getCustomProfile(uid) {
     const saved = localStorage.getItem(`profile_${uid}`);
     return saved ? JSON.parse(saved) : null;
@@ -138,7 +140,126 @@ langSelector.addEventListener('change', (e) => {
     updateLanguage(e.target.value);
 });
 
-// Mở/Đóng Modal Cài đặt Hồ sơ
+// Chuyển đổi giữa các phòng chat
+function switchRoom(roomName) {
+    currentRoom = roomName;
+    chatBox.innerHTML = ''; // Xóa tin nhắn cũ trên giao diện
+    isFirstLoad = true;
+
+    if (roomName === 'family') {
+        tabFamily.classList.add('active');
+        tabGame.classList.remove('active');
+    } else {
+        tabGame.classList.add('active');
+        tabFamily.classList.remove('active');
+    }
+
+    loadMessagesForRoom();
+}
+
+tabFamily.addEventListener('click', () => switchRoom('family'));
+tabGame.addEventListener('click', () => switchRoom('game'));
+
+function loadMessagesForRoom() {
+    if (currentMessagesRef) {
+        off(currentMessagesRef); // Hủy lắng nghe phòng cũ
+    }
+
+    currentMessagesRef = ref(db, `messages_${currentRoom}`);
+
+    onChildAdded(currentMessagesRef, (snapshot) => {
+        const data = snapshot.val();
+        const messageKey = snapshot.key;
+        const isMe = currentUser && data.uid === currentUser.uid;
+        const isCurrentAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+        const isMsgAdmin = data.email === ADMIN_EMAIL;
+
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.username || 'U')}&background=0D8ABC&color=fff&rounded=true`;
+        const avatarUrl = (data.avatar && data.avatar !== '' && !data.avatar.includes('gstatic.com')) ? data.avatar : defaultAvatar;
+        const timeString = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+        const msgElement = document.createElement('div');
+        msgElement.classList.add('message-item');
+        msgElement.setAttribute('id', `msg-${messageKey}`);
+        if (isMe) msgElement.classList.add('my-message');
+
+        const canDelete = isMe || isCurrentAdmin;
+        const deleteBtnHtml = canDelete ? `<button class="delete-btn" title="Delete" data-key="${messageKey}">✕</button>` : '';
+        const adminBadgeHtml = isMsgAdmin ? '<span class="admin-tag">Admin</span>' : '';
+
+        let contentHtml = '';
+        if (data.imageUrl) {
+            contentHtml = `
+                <a href="${data.imageUrl}" target="_blank" rel="noopener noreferrer">
+                    <img src="${data.imageUrl}" class="chat-img" alt="Image" crossOrigin="anonymous" loading="lazy">
+                </a>
+            `;
+        } else {
+            contentHtml = `<div class="message-text">${data.text}</div>`;
+        }
+
+        msgElement.innerHTML = `
+            <div class="message-header">
+                <div class="user-profile">
+                    <img src="${avatarUrl}" class="msg-avatar" alt="Avatar" onerror="this.src='${defaultAvatar}';">
+                    <span class="message-user">${data.username}</span>
+                    ${adminBadgeHtml}
+                </div>
+                ${deleteBtnHtml}
+            </div>
+            ${contentHtml}
+            <div class="message-time">${timeString}</div>
+        `;
+
+        if (canDelete) {
+            const deleteBtn = msgElement.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                if (confirm(translations[currentLang].deleteConfirm)) {
+                    const itemRef = ref(db, `messages_${currentRoom}/${messageKey}`);
+                    remove(itemRef);
+                }
+            });
+        }
+
+        chatBox.appendChild(msgElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        if (!isMe && !isFirstLoad) {
+            notifSound.play().catch(e => {});
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const bodyText = data.imageUrl ? '[Image]' : data.text;
+                
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(`MyChat [${currentRoom.toUpperCase()}] - ${data.username}`, {
+                            body: bodyText,
+                            icon: avatarUrl,
+                            badge: avatarUrl
+                        });
+                    });
+                } else {
+                    new Notification(`MyChat [${currentRoom.toUpperCase()}] - ${data.username}`, {
+                        body: bodyText,
+                        icon: avatarUrl
+                    });
+                }
+            }
+        }
+    });
+
+    onChildRemoved(currentMessagesRef, (snapshot) => {
+        const messageKey = snapshot.key;
+        const msgElement = document.getElementById(`msg-${messageKey}`);
+        if (msgElement) msgElement.remove();
+    });
+
+    setTimeout(() => {
+        isFirstLoad = false;
+    }, 1500);
+}
+
+// Modal Hồ sơ
 openProfileBtn.addEventListener('click', () => {
     if (!currentUser) return;
     const custom = getCustomProfile(currentUser.uid);
@@ -153,14 +274,12 @@ closeModalBtn.addEventListener('click', () => {
     profileModal.style.display = 'none';
 });
 
-// Xem trước ảnh khi dán URL
 inputNewAvatarUrl.addEventListener('input', () => {
     if (inputNewAvatarUrl.value.trim() !== '') {
         previewAvatar.src = inputNewAvatarUrl.value.trim();
     }
 });
 
-// Xem trước ảnh khi chọn file tải lên
 inputNewAvatarFile.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -182,7 +301,6 @@ inputNewAvatarFile.addEventListener('change', async (e) => {
     }
 });
 
-// Lưu thông tin cá nhân mới
 saveProfileBtn.addEventListener('click', () => {
     if (!currentUser) return;
     const newName = inputNewName.value.trim() || currentUser.displayName;
@@ -259,6 +377,9 @@ onAuthStateChanged(auth, (user) => {
         `;
         loginContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
+
+        // Tải tin nhắn của phòng hiện tại khi đăng nhập thành công
+        loadMessagesForRoom();
     } else {
         currentUser = null;
         loginContainer.style.display = 'block';
@@ -269,13 +390,13 @@ onAuthStateChanged(auth, (user) => {
 function sendMessage() {
     const message = messageInput.value.trim();
 
-    if (message !== '' && currentUser) {
+    if (message !== '' && currentUser && currentMessagesRef) {
         const isAdmin = currentUser.email === ADMIN_EMAIL;
         const custom = getCustomProfile(currentUser.uid);
         const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : currentUser.displayName);
         const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
-        push(messagesRef, {
+        push(currentMessagesRef, {
             uid: currentUser.uid,
             email: currentUser.email,
             username: displayName,
@@ -295,7 +416,7 @@ messageInput.addEventListener('keypress', (e) => {
 
 imageInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (!file || !currentUser) return;
+    if (!file || !currentUser || !currentMessagesRef) return;
 
     if (!file.type.startsWith('image/')) {
         alert(currentLang === 'vi' ? 'Vui lòng chọn tệp hình ảnh!' : 'Please select an image file!');
@@ -320,7 +441,7 @@ imageInput.addEventListener('change', async (e) => {
             const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : currentUser.displayName);
             const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
-            push(messagesRef, {
+            push(currentMessagesRef, {
                 uid: currentUser.uid,
                 email: currentUser.email,
                 username: displayName,
@@ -334,95 +455,4 @@ imageInput.addEventListener('change', async (e) => {
     } catch (error) {
         console.error("Lỗi:", error);
     }
-});
-
-onChildAdded(messagesRef, (snapshot) => {
-    const data = snapshot.val();
-    const messageKey = snapshot.key;
-    const isMe = currentUser && data.uid === currentUser.uid;
-    const isCurrentAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
-    const isMsgAdmin = data.email === ADMIN_EMAIL;
-
-    const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.username || 'U')}&background=0D8ABC&color=fff&rounded=true`;
-    const avatarUrl = (data.avatar && data.avatar !== '' && !data.avatar.includes('gstatic.com')) ? data.avatar : defaultAvatar;
-    const timeString = data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-
-    const msgElement = document.createElement('div');
-    msgElement.classList.add('message-item');
-    msgElement.setAttribute('id', `msg-${messageKey}`);
-    if (isMe) msgElement.classList.add('my-message');
-
-    const canDelete = isMe || isCurrentAdmin;
-    const deleteBtnHtml = canDelete ? `<button class="delete-btn" title="Delete" data-key="${messageKey}">✕</button>` : '';
-    const adminBadgeHtml = isMsgAdmin ? '<span class="admin-tag">Admin</span>' : '';
-
-    let contentHtml = '';
-    if (data.imageUrl) {
-        contentHtml = `
-            <a href="${data.imageUrl}" target="_blank" rel="noopener noreferrer">
-                <img src="${data.imageUrl}" class="chat-img" alt="Image" crossOrigin="anonymous" loading="lazy">
-            </a>
-        `;
-    } else {
-        contentHtml = `<div class="message-text">${data.text}</div>`;
-    }
-
-    msgElement.innerHTML = `
-        <div class="message-header">
-            <div class="user-profile">
-                <img src="${avatarUrl}" class="msg-avatar" alt="Avatar" onerror="this.src='${defaultAvatar}';">
-                <span class="message-user">${data.username}</span>
-                ${adminBadgeHtml}
-            </div>
-            ${deleteBtnHtml}
-        </div>
-        ${contentHtml}
-        <div class="message-time">${timeString}</div>
-    `;
-
-    if (canDelete) {
-        const deleteBtn = msgElement.querySelector('.delete-btn');
-        deleteBtn.addEventListener('click', () => {
-            if (confirm(translations[currentLang].deleteConfirm)) {
-                const itemRef = ref(db, `messages/${messageKey}`);
-                remove(itemRef);
-            }
-        });
-    }
-
-    chatBox.appendChild(msgElement);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    if (!isMe && !isFirstLoad) {
-        notifSound.play().catch(e => {});
-
-        if ('Notification' in window && Notification.permission === 'granted') {
-            const bodyText = data.imageUrl ? '[Image]' : data.text;
-            
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification(`MyChat - ${data.username}`, {
-                        body: bodyText,
-                        icon: avatarUrl,
-                        badge: avatarUrl
-                    });
-                });
-            } else {
-                new Notification(`MyChat - ${data.username}`, {
-                    body: bodyText,
-                    icon: avatarUrl
-                });
-            }
-        }
-    }
-});
-
-setTimeout(() => {
-    isFirstLoad = false;
-}, 2000);
-
-onChildRemoved(messagesRef, (snapshot) => {
-    const messageKey = snapshot.key;
-    const msgElement = document.getElementById(`msg-${messageKey}`);
-    if (msgElement) msgElement.remove();
 });

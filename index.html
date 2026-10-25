@@ -24,17 +24,20 @@
             <h2>MyChat</h2>
             <div class="user-info">
                 <span id="userDisplayName"></span>
-                <!-- Nút mở bảng đổi Tên & Avatar ⚙️ -->
                 <button id="openProfileBtn" class="profile-btn" title="Edit Profile">⚙️</button>
-                <!-- Bảng chọn ngôn ngữ -->
                 <select id="langSelector" class="lang-selector">
                     <option value="en" selected>English</option>
                     <option value="vi">Tiếng Việt</option>
                 </select>
-                <!-- Nút bật thông báo -->
-                <button id="enableNotifBtn" class="notif-btn" title="Enable notifications">🔔 Turn on Notifications</button>
+                <button id="enableNotifBtn" class="notif-btn" title="Enable notifications">🔔 Turn on</button>
                 <button id="logoutBtn" class="logout-btn">Logout</button>
             </div>
+        </div>
+
+        <!-- Thanh chuyển đổi phòng chat -->
+        <div class="room-tabs">
+            <button id="tabFamily" class="room-tab active">🏠 Family Chat</button>
+            <button id="tabGame" class="room-tab">🎮 Game Chat</button>
         </div>
 
         <!-- Khu vực hiển thị tin nhắn -->
