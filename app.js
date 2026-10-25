@@ -37,7 +37,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.error('Lỗi Service Worker:', err));
 }
 
-// BỘ TỪ ĐIỂN ĐA NGÔN NGỮ (Mặc định là 'en')
+// BỘ TỪ ĐIỂN ĐA NGÔN NGỮ
 let currentLang = 'en';
 const translations = {
     en: {
@@ -50,7 +50,14 @@ const translations = {
         send: "Send",
         deleteConfirm: "Are you sure you want to delete/revoke this message?",
         notifSuccess: "Notifications and audio enabled successfully!",
-        notifBlocked: "Notifications blocked. Click the lock icon 🔒 in the address bar to enable!"
+        notifBlocked: "Notifications blocked. Click the lock icon 🔒 in the address bar to enable!",
+        modalTitle: "Edit Profile",
+        labelName: "Display Name:",
+        labelAvatar: "Avatar Image (Upload or URL):",
+        urlPlaceholder: "Or paste image URL here...",
+        save: "Save",
+        cancel: "Cancel",
+        profileUpdated: "Profile updated successfully!"
     },
     vi: {
         loginTitle: "Đăng Nhập MyChat",
@@ -62,7 +69,14 @@ const translations = {
         send: "Gửi",
         deleteConfirm: "Bạn có chắc muốn xóa/thu hồi tin nhắn này?",
         notifSuccess: "Đã bật thông báo và âm thanh thành công!",
-        notifBlocked: "Bạn đã chặn thông báo. Vui lòng bấm vào icon ổ khóa 🔒 ở thanh địa chỉ web để bật lại!"
+        notifBlocked: "Bạn đã chặn thông báo. Vui lòng bấm vào icon ổ khóa 🔒 ở thanh địa chỉ web để bật lại!",
+        modalTitle: "Chỉnh sửa Hồ sơ",
+        labelName: "Tên hiển thị:",
+        labelAvatar: "Ảnh đại diện (Tải lên hoặc dán link):",
+        urlPlaceholder: "Hoặc dán link ảnh vào đây...",
+        save: "Lưu",
+        cancel: "Hủy",
+        profileUpdated: "Cập nhật hồ sơ thành công!"
     }
 };
 
@@ -75,6 +89,13 @@ function updateLanguage(lang) {
     document.getElementById('logoutBtn').innerText = translations[lang].logout;
     document.getElementById('messageInput').placeholder = translations[lang].msgPlaceholder;
     document.getElementById('sendBtn').innerText = translations[lang].send;
+
+    document.getElementById('modalTitle').innerText = translations[lang].modalTitle;
+    document.getElementById('labelName').innerText = translations[lang].labelName;
+    document.getElementById('labelAvatar').innerText = translations[lang].labelAvatar;
+    document.getElementById('inputNewAvatarUrl').placeholder = translations[lang].urlPlaceholder;
+    document.getElementById('saveProfileBtn').innerText = translations[lang].save;
+    document.getElementById('closeModalBtn').innerText = translations[lang].cancel;
 }
 
 const loginContainer = document.getElementById('loginContainer');
@@ -90,12 +111,96 @@ const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const imageInput = document.getElementById('imageInput');
 
+// Elements Modal Profile
+const openProfileBtn = document.getElementById('openProfileBtn');
+const profileModal = document.getElementById('profileModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const saveProfileBtn = document.getElementById('saveProfileBtn');
+const inputNewName = document.getElementById('inputNewName');
+const inputNewAvatarUrl = document.getElementById('inputNewAvatarUrl');
+const inputNewAvatarFile = document.getElementById('inputNewAvatarFile');
+const previewAvatar = document.getElementById('previewAvatar');
+
 let currentUser = null;
 let isFirstLoad = true;
 
-// Sự kiện đổi ngôn ngữ
+// Lưu trữ thông tin tùy chỉnh cục bộ (Custom Profile)
+function getCustomProfile(uid) {
+    const saved = localStorage.getItem(`profile_${uid}`);
+    return saved ? JSON.parse(saved) : null;
+}
+
+function saveCustomProfile(uid, profileData) {
+    localStorage.setItem(`profile_${uid}`, JSON.stringify(profileData));
+}
+
 langSelector.addEventListener('change', (e) => {
     updateLanguage(e.target.value);
+});
+
+// Mở/Đóng Modal Cài đặt Hồ sơ
+openProfileBtn.addEventListener('click', () => {
+    if (!currentUser) return;
+    const custom = getCustomProfile(currentUser.uid);
+    inputNewName.value = custom ? custom.name : (currentUser.email === ADMIN_EMAIL ? "Út Gà" : currentUser.displayName);
+    const currentAvatar = custom ? custom.avatar : getGoogleAvatar(currentUser);
+    previewAvatar.src = currentAvatar;
+    inputNewAvatarUrl.value = '';
+    profileModal.style.display = 'flex';
+});
+
+closeModalBtn.addEventListener('click', () => {
+    profileModal.style.display = 'none';
+});
+
+// Xem trước ảnh khi dán URL
+inputNewAvatarUrl.addEventListener('input', () => {
+    if (inputNewAvatarUrl.value.trim() !== '') {
+        previewAvatar.src = inputNewAvatarUrl.value.trim();
+    }
+});
+
+// Xem trước ảnh khi chọn file tải lên
+inputNewAvatarFile.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+            const url = result.data.display_url || result.data.url;
+            inputNewAvatarUrl.value = url;
+            previewAvatar.src = url;
+        }
+    } catch (err) {
+        console.error("Upload error:", err);
+    }
+});
+
+// Lưu thông tin cá nhân mới
+saveProfileBtn.addEventListener('click', () => {
+    if (!currentUser) return;
+    const newName = inputNewName.value.trim() || currentUser.displayName;
+    const newAvatar = previewAvatar.src;
+
+    saveCustomProfile(currentUser.uid, { name: newName, avatar: newAvatar });
+
+    const isAdmin = currentUser.email === ADMIN_EMAIL;
+    const displayName = isAdmin ? "Út Gà" : newName;
+
+    userDisplayName.innerHTML = `
+        <img src="${newAvatar}" class="header-avatar" alt="Avatar">
+        <span>${displayName}</span>
+        ${isAdmin ? '<span class="admin-badge">Admin</span>' : ''}
+    `;
+
+    profileModal.style.display = 'none';
+    alert(translations[currentLang].profileUpdated);
 });
 
 if (enableNotifBtn) {
@@ -143,8 +248,9 @@ onAuthStateChanged(auth, (user) => {
         }
 
         const isAdmin = user.email === ADMIN_EMAIL;
-        const displayName = isAdmin ? "Út Gà" : user.displayName;
-        const avatarUrl = getGoogleAvatar(user);
+        const custom = getCustomProfile(user.uid);
+        const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : user.displayName);
+        const avatarUrl = custom ? custom.avatar : getGoogleAvatar(user);
 
         userDisplayName.innerHTML = `
             <img src="${avatarUrl}" class="header-avatar" alt="Avatar">
@@ -165,8 +271,9 @@ function sendMessage() {
 
     if (message !== '' && currentUser) {
         const isAdmin = currentUser.email === ADMIN_EMAIL;
-        const displayName = isAdmin ? "Út Gà" : currentUser.displayName;
-        const avatarUrl = getGoogleAvatar(currentUser);
+        const custom = getCustomProfile(currentUser.uid);
+        const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : currentUser.displayName);
+        const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
         push(messagesRef, {
             uid: currentUser.uid,
@@ -209,8 +316,9 @@ imageInput.addEventListener('change', async (e) => {
         if (result.success) {
             const imageUrl = result.data.display_url || result.data.url;
             const isAdmin = currentUser.email === ADMIN_EMAIL;
-            const displayName = isAdmin ? "Út Gà" : currentUser.displayName;
-            const avatarUrl = getGoogleAvatar(currentUser);
+            const custom = getCustomProfile(currentUser.uid);
+            const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : currentUser.displayName);
+            const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
             push(messagesRef, {
                 uid: currentUser.uid,
@@ -222,8 +330,6 @@ imageInput.addEventListener('change', async (e) => {
                 timestamp: Date.now()
             });
             imageInput.value = '';
-        } else {
-            alert(currentLang === 'vi' ? 'Lỗi tải ảnh lên dịch vụ lưu trữ!' : 'Upload failed!');
         }
     } catch (error) {
         console.error("Lỗi:", error);

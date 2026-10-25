@@ -9,11 +9,11 @@
 <body>
     <!-- Màn hình Đăng nhập -->
     <div id="loginContainer" class="login-container">
-        <h2 id="loginTitle">Đăng Nhập MyChat</h2>
-        <p id="loginSubtitle" style="margin-top: 8px; color: #666;">Vui lòng đăng nhập để bắt đầu trò chuyện</p>
+        <h2 id="loginTitle">Sign in to MyChat</h2>
+        <p id="loginSubtitle" style="margin-top: 8px; color: #666;">Please sign in to start chatting</p>
         <button id="googleLoginBtn" class="google-btn">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-            <span id="loginBtnText">Đăng nhập bằng Google</span>
+            <span id="loginBtnText">Sign in with Google</span>
         </button>
     </div>
 
@@ -24,12 +24,14 @@
             <h2>MyChat</h2>
             <div class="user-info">
                 <span id="userDisplayName"></span>
-                <!-- Bảng chọn ngôn ngữ (Mặc định Tiếng Anh) -->
+                <!-- Nút mở bảng đổi Tên & Avatar ⚙️ -->
+                <button id="openProfileBtn" class="profile-btn" title="Edit Profile">⚙️</button>
+                <!-- Bảng chọn ngôn ngữ -->
                 <select id="langSelector" class="lang-selector">
                     <option value="en" selected>English</option>
                     <option value="vi">Tiếng Việt</option>
                 </select>
-                <!-- Nút bật thông báo chủ động -->
+                <!-- Nút bật thông báo -->
                 <button id="enableNotifBtn" class="notif-btn" title="Enable notifications">🔔 Turn on Notifications</button>
                 <button id="logoutBtn" class="logout-btn">Logout</button>
             </div>
@@ -40,13 +42,33 @@
 
         <!-- Thanh nhập tin nhắn & Gửi ảnh -->
         <div class="chat-input-area">
-            <!-- Nút đính kèm hình ảnh 📷 -->
             <label for="imageInput" class="image-upload-btn" title="Send image">📷</label>
             <input type="file" id="imageInput" accept="image/*" style="display: none;">
             
-            <!-- Ô nhập nội dung tin nhắn -->
             <input type="text" id="messageInput" placeholder="Type a message..." class="input-msg">
             <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <!-- Modal Đổi Tên & Avatar -->
+    <div id="profileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 id="modalTitle">Edit Profile</h3>
+            <div class="profile-preview-container">
+                <img id="previewAvatar" src="" alt="Avatar Preview" class="modal-avatar-preview">
+            </div>
+            
+            <label id="labelName" class="modal-label">Display Name:</label>
+            <input type="text" id="inputNewName" class="modal-input" placeholder="Enter new name...">
+
+            <label id="labelAvatar" class="modal-label">Avatar Image (Upload or URL):</label>
+            <input type="file" id="inputNewAvatarFile" accept="image/*" class="modal-file-input">
+            <input type="text" id="inputNewAvatarUrl" class="modal-input" placeholder="Or paste image URL here...">
+
+            <div class="modal-buttons">
+                <button id="saveProfileBtn" class="modal-save-btn">Save</button>
+                <button id="closeModalBtn" class="modal-close-btn">Cancel</button>
+            </div>
         </div>
     </div>
 

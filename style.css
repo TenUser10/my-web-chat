@@ -92,6 +92,36 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
+/* Nút Cài đặt hồ sơ ⚙️ */
+.profile-btn {
+    background: #f0f2f5;
+    color: #333;
+    border: none;
+    padding: 3px 6px;
+    font-size: 0.85em;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 4px;
+    transition: background 0.2s;
+}
+
+.profile-btn:hover {
+    background: #e4e6eb;
+}
+
+.lang-selector {
+    background: #ffffff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 3px 6px;
+    font-size: 0.8em;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 4px;
+    outline: none;
+}
+
 .notif-btn {
     background: #ffc107;
     color: #333;
@@ -105,10 +135,6 @@ body {
     transition: background 0.2s;
 }
 
-.notif-btn:hover {
-    background: #e0a800;
-}
-
 .logout-btn {
     background: #ff4d4f;
     color: white;
@@ -119,11 +145,6 @@ body {
     cursor: pointer;
     font-weight: bold;
     width: auto;
-    transition: background 0.2s;
-}
-
-.logout-btn:hover {
-    background: #d9363e;
 }
 
 /* Khu vực hiển thị tin nhắn */
@@ -138,7 +159,6 @@ body {
     background-color: #f7f9fa;
 }
 
-/* 3. ĐỊNH DẠNG TIN NHẮN & AVATAR */
 .message-item {
     background: #ffffff;
     padding: 8px 12px;
@@ -224,7 +244,6 @@ body {
     color: #e0e0e0;
 }
 
-/* Nút Thu hồi/Xóa tin nhắn (✕) */
 .delete-btn {
     background: transparent;
     color: #999;
@@ -242,21 +261,6 @@ body {
     display: inline-block;
 }
 
-.delete-btn:hover {
-    color: #ff4d4f;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.my-message .delete-btn {
-    color: #e0e0e0;
-}
-
-.my-message .delete-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* 4. ĐỊNH DẠNG NHÃN ADMIN */
 .admin-badge {
     background-color: #ff4d4f;
     color: white;
@@ -277,12 +281,7 @@ body {
     font-weight: bold;
 }
 
-.my-message .admin-tag {
-    background-color: #ffffff;
-    color: #0084ff;
-}
-
-/* 5. Ô NHẬP TIN NHẮN & NÚT GỬI ĐÍNH KÈM */
+/* Ô nhập tin nhắn */
 .chat-input-area {
     padding: 12px;
     border-top: 1px solid #eee;
@@ -300,11 +299,6 @@ body {
     justify-content: center;
     padding: 0 4px;
     user-select: none;
-    transition: transform 0.15s;
-}
-
-.image-upload-btn:hover {
-    transform: scale(1.2);
 }
 
 .input-msg {
@@ -316,10 +310,6 @@ body {
     font-size: 0.95em;
 }
 
-.input-msg:focus {
-    border-color: #0084ff;
-}
-
 button#sendBtn {
     width: 20%;
     background: #0084ff;
@@ -329,26 +319,91 @@ button#sendBtn {
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    transition: background 0.2s;
 }
 
-button#sendBtn:hover {
-    background: #006bce;
+/* 6. MODAL CÀI ĐẶT HỒ SƠ */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
-/* (Giữ nguyên toàn bộ CSS cũ và bổ sung thêm đoạn này) */
-.lang-selector {
-    background: #ffffff;
+
+.modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-content h3 {
+    text-align: center;
     color: #333;
+}
+
+.profile-preview-container {
+    display: flex;
+    justify-content: center;
+}
+
+.modal-avatar-preview {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #0084ff;
+}
+
+.modal-label {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #555;
+}
+
+.modal-input {
+    padding: 8px;
     border: 1px solid #ccc;
-    padding: 3px 6px;
-    font-size: 0.8em;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-right: 4px;
+    border-radius: 6px;
+    font-size: 0.9em;
     outline: none;
 }
 
-.lang-selector:hover {
-    background: #f0f0f0;
+.modal-file-input {
+    font-size: 0.85em;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.modal-save-btn {
+    flex: 1;
+    background: #0084ff;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-close-btn {
+    flex: 1;
+    background: #ccc;
+    color: #333;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
 }
