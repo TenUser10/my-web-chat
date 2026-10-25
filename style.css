@@ -335,3 +335,20 @@ button#sendBtn {
 button#sendBtn:hover {
     background: #006bce;
 }
+/* (Giữ nguyên toàn bộ CSS cũ và bổ sung thêm đoạn này) */
+.lang-selector {
+    background: #ffffff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 3px 6px;
+    font-size: 0.8em;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 4px;
+    outline: none;
+}
+
+.lang-selector:hover {
+    background: #f0f0f0;
+}

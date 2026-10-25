@@ -10,7 +10,6 @@ import {
     browserLocalPersistence 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Cấu hình Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCW3QFL9v94INRWsER4Ql8qDOjtypRXpiQ",
   authDomain: "my-web-chat-bf87d.firebaseapp.com",
@@ -32,12 +31,50 @@ const messagesRef = ref(db, 'messages');
 
 setPersistence(auth, browserLocalPersistence);
 
-// Tạo đối tượng phát âm thanh "tinh tinh"
 const notifSound = new Audio('notification.mp3');
 
-// Đăng ký Service Worker cho Push Notification
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.error('Lỗi Service Worker:', err));
+}
+
+// BỘ TỪ ĐIỂN ĐA NGÔN NGỮ (Mặc định là 'en')
+let currentLang = 'en';
+const translations = {
+    en: {
+        loginTitle: "Sign in to MyChat",
+        loginSubtitle: "Please sign in to start chatting",
+        loginBtnText: "Sign in with Google",
+        enableNotif: "🔔 Turn on Notifications",
+        logout: "Logout",
+        msgPlaceholder: "Type a message...",
+        send: "Send",
+        deleteConfirm: "Are you sure you want to delete/revoke this message?",
+        notifSuccess: "Notifications and audio enabled successfully!",
+        notifBlocked: "Notifications blocked. Click the lock icon 🔒 in the address bar to enable!"
+    },
+    vi: {
+        loginTitle: "Đăng Nhập MyChat",
+        loginSubtitle: "Vui lòng đăng nhập để bắt đầu trò chuyện",
+        loginBtnText: "Đăng nhập bằng Google",
+        enableNotif: "🔔 Bật thông báo",
+        logout: "Thoát",
+        msgPlaceholder: "Nhập tin nhắn...",
+        send: "Gửi",
+        deleteConfirm: "Bạn có chắc muốn xóa/thu hồi tin nhắn này?",
+        notifSuccess: "Đã bật thông báo và âm thanh thành công!",
+        notifBlocked: "Bạn đã chặn thông báo. Vui lòng bấm vào icon ổ khóa 🔒 ở thanh địa chỉ web để bật lại!"
+    }
+};
+
+function updateLanguage(lang) {
+    currentLang = lang;
+    document.getElementById('loginTitle').innerText = translations[lang].loginTitle;
+    document.getElementById('loginSubtitle').innerText = translations[lang].loginSubtitle;
+    document.getElementById('loginBtnText').innerText = translations[lang].loginBtnText;
+    document.getElementById('enableNotifBtn').innerText = translations[lang].enableNotif;
+    document.getElementById('logoutBtn').innerText = translations[lang].logout;
+    document.getElementById('messageInput').placeholder = translations[lang].msgPlaceholder;
+    document.getElementById('sendBtn').innerText = translations[lang].send;
 }
 
 const loginContainer = document.getElementById('loginContainer');
@@ -46,6 +83,7 @@ const googleLoginBtn = document.getElementById('googleLoginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const userDisplayName = document.getElementById('userDisplayName');
 const enableNotifBtn = document.getElementById('enableNotifBtn');
+const langSelector = document.getElementById('langSelector');
 
 const chatBox = document.getElementById('chatBox');
 const messageInput = document.getElementById('messageInput');
@@ -53,12 +91,15 @@ const sendBtn = document.getElementById('sendBtn');
 const imageInput = document.getElementById('imageInput');
 
 let currentUser = null;
-let isFirstLoad = true; // Chống phát tiếng cho tin nhắn cũ khi vừa tải ứng dụng
+let isFirstLoad = true;
 
-// Hàm kích hoạt xin quyền thông báo khi bấm nút 🔔
+// Sự kiện đổi ngôn ngữ
+langSelector.addEventListener('change', (e) => {
+    updateLanguage(e.target.value);
+});
+
 if (enableNotifBtn) {
     enableNotifBtn.addEventListener('click', () => {
-        // Phát tiếng thử ngắn để kích hoạt quyền audio
         notifSound.play().then(() => {
             notifSound.pause();
             notifSound.currentTime = 0;
@@ -67,14 +108,12 @@ if (enableNotifBtn) {
         if ('Notification' in window) {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    alert('Đã bật thông báo và âm thanh thành công!');
+                    alert(translations[currentLang].notifSuccess);
                     enableNotifBtn.style.display = 'none';
                 } else if (permission === 'denied') {
-                    alert('Bạn đã chặn thông báo. Vui lòng bấm vào icon ổ khóa 🔒 ở thanh địa chỉ web để bật lại!');
+                    alert(translations[currentLang].notifBlocked);
                 }
             });
-        } else {
-            alert('Trình duyệt của bạn không hỗ trợ thông báo Web Push!');
         }
     });
 }
@@ -99,7 +138,6 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         
-        // Ẩn nút thông báo nếu đã được cấp quyền trước đó
         if ('Notification' in window && Notification.permission === 'granted') {
             if (enableNotifBtn) enableNotifBtn.style.display = 'none';
         }
@@ -122,7 +160,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Gửi tin nhắn chữ
 function sendMessage() {
     const message = messageInput.value.trim();
 
@@ -149,13 +186,12 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// Gửi hình ảnh
 imageInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
 
     if (!file.type.startsWith('image/')) {
-        alert('Vui lòng chọn tệp hình ảnh!');
+        alert(currentLang === 'vi' ? 'Vui lòng chọn tệp hình ảnh!' : 'Please select an image file!');
         return;
     }
 
@@ -187,15 +223,13 @@ imageInput.addEventListener('change', async (e) => {
             });
             imageInput.value = '';
         } else {
-            alert('Lỗi tải ảnh lên dịch vụ lưu trữ!');
+            alert(currentLang === 'vi' ? 'Lỗi tải ảnh lên dịch vụ lưu trữ!' : 'Upload failed!');
         }
     } catch (error) {
         console.error("Lỗi:", error);
-        alert("Không thể gửi ảnh, vui lòng thử lại!");
     }
 });
 
-// Lắng nghe tin nhắn mới & Phát thông báo âm thanh
 onChildAdded(messagesRef, (snapshot) => {
     const data = snapshot.val();
     const messageKey = snapshot.key;
@@ -213,14 +247,14 @@ onChildAdded(messagesRef, (snapshot) => {
     if (isMe) msgElement.classList.add('my-message');
 
     const canDelete = isMe || isCurrentAdmin;
-    const deleteBtnHtml = canDelete ? `<button class="delete-btn" title="Xóa tin nhắn" data-key="${messageKey}">✕</button>` : '';
+    const deleteBtnHtml = canDelete ? `<button class="delete-btn" title="Delete" data-key="${messageKey}">✕</button>` : '';
     const adminBadgeHtml = isMsgAdmin ? '<span class="admin-tag">Admin</span>' : '';
 
     let contentHtml = '';
     if (data.imageUrl) {
         contentHtml = `
             <a href="${data.imageUrl}" target="_blank" rel="noopener noreferrer">
-                <img src="${data.imageUrl}" class="chat-img" alt="Hình ảnh" crossOrigin="anonymous" loading="lazy">
+                <img src="${data.imageUrl}" class="chat-img" alt="Image" crossOrigin="anonymous" loading="lazy">
             </a>
         `;
     } else {
@@ -243,7 +277,7 @@ onChildAdded(messagesRef, (snapshot) => {
     if (canDelete) {
         const deleteBtn = msgElement.querySelector('.delete-btn');
         deleteBtn.addEventListener('click', () => {
-            if (confirm('Bạn có chắc muốn xóa/thu hồi tin nhắn này?')) {
+            if (confirm(translations[currentLang].deleteConfirm)) {
                 const itemRef = ref(db, `messages/${messageKey}`);
                 remove(itemRef);
             }
@@ -253,12 +287,11 @@ onChildAdded(messagesRef, (snapshot) => {
     chatBox.appendChild(msgElement);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Phát âm thanh tinh tinh và đẩy thông báo Push
     if (!isMe && !isFirstLoad) {
-        notifSound.play().catch(e => console.log('Cần tương tác người dùng để phát âm thanh'));
+        notifSound.play().catch(e => {});
 
         if ('Notification' in window && Notification.permission === 'granted') {
-            const bodyText = data.imageUrl ? '[Đã gửi một hình ảnh]' : data.text;
+            const bodyText = data.imageUrl ? '[Image]' : data.text;
             
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.ready.then(registration => {

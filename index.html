@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +9,11 @@
 <body>
     <!-- Màn hình Đăng nhập -->
     <div id="loginContainer" class="login-container">
-        <h2>Đăng Nhập MyChat</h2>
-        <p style="margin-top: 8px; color: #666;">Vui lòng đăng nhập để bắt đầu trò chuyện</p>
+        <h2 id="loginTitle">Đăng Nhập MyChat</h2>
+        <p id="loginSubtitle" style="margin-top: 8px; color: #666;">Vui lòng đăng nhập để bắt đầu trò chuyện</p>
         <button id="googleLoginBtn" class="google-btn">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-            Đăng nhập bằng Google
+            <span id="loginBtnText">Đăng nhập bằng Google</span>
         </button>
     </div>
 
@@ -24,9 +24,14 @@
             <h2>MyChat</h2>
             <div class="user-info">
                 <span id="userDisplayName"></span>
+                <!-- Bảng chọn ngôn ngữ (Mặc định Tiếng Anh) -->
+                <select id="langSelector" class="lang-selector">
+                    <option value="en" selected>English</option>
+                    <option value="vi">Tiếng Việt</option>
+                </select>
                 <!-- Nút bật thông báo chủ động -->
-                <button id="enableNotifBtn" class="notif-btn" title="Bật thông báo & âm thanh">🔔 Bật thông báo</button>
-                <button id="logoutBtn" class="logout-btn">Thoát</button>
+                <button id="enableNotifBtn" class="notif-btn" title="Enable notifications">🔔 Turn on Notifications</button>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
             </div>
         </div>
 
@@ -36,12 +41,12 @@
         <!-- Thanh nhập tin nhắn & Gửi ảnh -->
         <div class="chat-input-area">
             <!-- Nút đính kèm hình ảnh 📷 -->
-            <label for="imageInput" class="image-upload-btn" title="Gửi hình ảnh">📷</label>
+            <label for="imageInput" class="image-upload-btn" title="Send image">📷</label>
             <input type="file" id="imageInput" accept="image/*" style="display: none;">
             
             <!-- Ô nhập nội dung tin nhắn -->
-            <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." class="input-msg">
-            <button id="sendBtn">Gửi</button>
+            <input type="text" id="messageInput" placeholder="Type a message..." class="input-msg">
+            <button id="sendBtn">Send</button>
         </div>
     </div>
 
