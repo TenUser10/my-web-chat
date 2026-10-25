@@ -37,7 +37,7 @@ if ('serviceWorker' in navigator) {
 }
 
 let currentLang = 'en';
-let currentRoom = 'family'; // Mặc định là phòng Family Chat
+let currentRoom = 'family';
 let currentMessagesRef = null;
 
 const translations = {
@@ -140,10 +140,9 @@ langSelector.addEventListener('change', (e) => {
     updateLanguage(e.target.value);
 });
 
-// Chuyển đổi giữa các phòng chat
 function switchRoom(roomName) {
     currentRoom = roomName;
-    chatBox.innerHTML = ''; // Xóa tin nhắn cũ trên giao diện
+    chatBox.innerHTML = '';
     isFirstLoad = true;
 
     if (roomName === 'family') {
@@ -162,7 +161,7 @@ tabGame.addEventListener('click', () => switchRoom('game'));
 
 function loadMessagesForRoom() {
     if (currentMessagesRef) {
-        off(currentMessagesRef); // Hủy lắng nghe phòng cũ
+        off(currentMessagesRef);
     }
 
     currentMessagesRef = ref(db, `messages_${currentRoom}`);
@@ -259,11 +258,11 @@ function loadMessagesForRoom() {
     }, 1500);
 }
 
-// Modal Hồ sơ
 openProfileBtn.addEventListener('click', () => {
     if (!currentUser) return;
     const custom = getCustomProfile(currentUser.uid);
-    inputNewName.value = custom ? custom.name : (currentUser.email === ADMIN_EMAIL ? "Út Gà" : currentUser.displayName);
+    const isAdmin = currentUser.email === ADMIN_EMAIL;
+    inputNewName.value = custom ? custom.name : (isAdmin ? "Út Gà" : currentUser.displayName);
     const currentAvatar = custom ? custom.avatar : getGoogleAvatar(currentUser);
     previewAvatar.src = currentAvatar;
     inputNewAvatarUrl.value = '';
@@ -309,7 +308,7 @@ saveProfileBtn.addEventListener('click', () => {
     saveCustomProfile(currentUser.uid, { name: newName, avatar: newAvatar });
 
     const isAdmin = currentUser.email === ADMIN_EMAIL;
-    const displayName = isAdmin ? "Út Gà" : newName;
+    const displayName = newName;
 
     userDisplayName.innerHTML = `
         <img src="${newAvatar}" class="header-avatar" alt="Avatar">
@@ -367,7 +366,7 @@ onAuthStateChanged(auth, (user) => {
 
         const isAdmin = user.email === ADMIN_EMAIL;
         const custom = getCustomProfile(user.uid);
-        const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : user.displayName);
+        const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : user.displayName);
         const avatarUrl = custom ? custom.avatar : getGoogleAvatar(user);
 
         userDisplayName.innerHTML = `
@@ -378,7 +377,6 @@ onAuthStateChanged(auth, (user) => {
         loginContainer.style.display = 'none';
         chatContainer.style.display = 'flex';
 
-        // Tải tin nhắn của phòng hiện tại khi đăng nhập thành công
         loadMessagesForRoom();
     } else {
         currentUser = null;
@@ -393,7 +391,7 @@ function sendMessage() {
     if (message !== '' && currentUser && currentMessagesRef) {
         const isAdmin = currentUser.email === ADMIN_EMAIL;
         const custom = getCustomProfile(currentUser.uid);
-        const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : currentUser.displayName);
+        const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : (currentUser.displayName || "User"));
         const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
         push(currentMessagesRef, {
@@ -438,7 +436,7 @@ imageInput.addEventListener('change', async (e) => {
             const imageUrl = result.data.display_url || result.data.url;
             const isAdmin = currentUser.email === ADMIN_EMAIL;
             const custom = getCustomProfile(currentUser.uid);
-            const displayName = isAdmin ? "Út Gà" : (custom ? custom.name : currentUser.displayName);
+            const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : (currentUser.displayName || "User"));
             const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
             push(currentMessagesRef, {
