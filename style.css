@@ -66,11 +66,14 @@ body {
 .chat-header {
     background: #0084ff;
     color: #ffffff;
-    padding: 14px 16px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .chat-header h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     text-align: center;
 }
 
@@ -78,31 +81,48 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
     font-size: 0.85em;
-    margin-top: 6px;
+    position: relative;
+    z-index: 10;
+}
+
+.user-profile-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .header-avatar {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 6px;
-    vertical-align: middle;
     border: 1px solid rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
 }
 
-/* Nút Cài đặt hồ sơ ⚙️ */
+/* Các nút chức năng trên Header (Đảm bảo luôn bấm được) */
+.profile-btn, .lang-selector, .notif-btn, .logout-btn {
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    padding: 5px 8px;
+    border: none;
+    outline: none;
+    transition: background 0.2s;
+    z-index: 15; /* Nổi lên trên cùng */
+}
+
 .profile-btn {
     background: #f0f2f5;
     color: #333;
-    border: none;
-    padding: 3px 6px;
-    font-size: 0.85em;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 4px;
-    transition: background 0.2s;
 }
 
 .profile-btn:hover {
@@ -113,38 +133,24 @@ body {
     background: #ffffff;
     color: #333;
     border: 1px solid #ccc;
-    padding: 3px 6px;
-    font-size: 0.8em;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-right: 4px;
-    outline: none;
 }
 
 .notif-btn {
     background: #ffc107;
     color: #333;
-    border: none;
-    padding: 4px 8px;
-    font-size: 0.8em;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-right: 4px;
-    transition: background 0.2s;
+}
+
+.notif-btn:hover {
+    background: #e0a800;
 }
 
 .logout-btn {
     background: #ff4d4f;
     color: white;
-    border: none;
-    padding: 4px 10px;
-    font-size: 0.8em;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    width: auto;
+}
+
+.logout-btn:hover {
+    background: #d9363e;
 }
 
 /* Khu vực hiển thị tin nhắn */
