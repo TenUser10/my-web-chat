@@ -3,6 +3,7 @@ import { getDatabase, ref, push, remove, onChildAdded, onChildRemoved, off } fro
 import { 
     getAuth, 
     signInWithPopup, 
+    signInAnonymously,
     GoogleAuthProvider, 
     onAuthStateChanged, 
     signOut,
@@ -45,6 +46,7 @@ const translations = {
         loginTitle: "Sign in to MyChat",
         loginSubtitle: "Please sign in to start chatting",
         loginBtnText: "Sign in with Google",
+        guestBtnText: "👤 Sign in as Guest",
         enableNotif: "🔔 Turn on",
         logout: "Logout",
         msgPlaceholder: "Type a message...",
@@ -64,6 +66,7 @@ const translations = {
         loginTitle: "Đăng Nhập MyChat",
         loginSubtitle: "Vui lòng đăng nhập để bắt đầu trò chuyện",
         loginBtnText: "Đăng nhập bằng Google",
+        guestBtnText: "👤 Đăng nhập bằng Khách (Guest)",
         enableNotif: "🔔 Bật thông báo",
         logout: "Thoát",
         msgPlaceholder: "Nhập tin nhắn...",
@@ -86,6 +89,7 @@ function updateLanguage(lang) {
     document.getElementById('loginTitle').innerText = translations[lang].loginTitle;
     document.getElementById('loginSubtitle').innerText = translations[lang].loginSubtitle;
     document.getElementById('loginBtnText').innerText = translations[lang].loginBtnText;
+    document.getElementById('guestBtnText').innerText = translations[lang].guestBtnText;
     document.getElementById('enableNotifBtn').innerText = translations[lang].enableNotif;
     document.getElementById('logoutBtn').innerText = translations[lang].logout;
     document.getElementById('messageInput').placeholder = translations[lang].msgPlaceholder;
@@ -102,6 +106,7 @@ function updateLanguage(lang) {
 const loginContainer = document.getElementById('loginContainer');
 const chatContainer = document.getElementById('chatContainer');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
+const guestLoginBtn = document.getElementById('guestLoginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const userDisplayName = document.getElementById('userDisplayName');
 const enableNotifBtn = document.getElementById('enableNotifBtn');
@@ -262,7 +267,8 @@ openProfileBtn.addEventListener('click', () => {
     if (!currentUser) return;
     const custom = getCustomProfile(currentUser.uid);
     const isAdmin = currentUser.email === ADMIN_EMAIL;
-    inputNewName.value = custom ? custom.name : (isAdmin ? "Út Gà" : currentUser.displayName);
+    const defaultName = currentUser.isAnonymous ? "Guest_" + currentUser.uid.substring(0, 4) : (isAdmin ? "Út Gà" : currentUser.displayName);
+    inputNewName.value = custom ? custom.name : defaultName;
     const currentAvatar = custom ? custom.avatar : getGoogleAvatar(currentUser);
     previewAvatar.src = currentAvatar;
     inputNewAvatarUrl.value = '';
@@ -302,7 +308,8 @@ inputNewAvatarFile.addEventListener('change', async (e) => {
 
 saveProfileBtn.addEventListener('click', () => {
     if (!currentUser) return;
-    const newName = inputNewName.value.trim() || currentUser.displayName;
+    const defaultName = currentUser.isAnonymous ? "Guest_" + currentUser.uid.substring(0, 4) : currentUser.displayName;
+    const newName = inputNewName.value.trim() || defaultName;
     const newAvatar = previewAvatar.src;
 
     saveCustomProfile(currentUser.uid, { name: newName, avatar: newAvatar });
@@ -344,12 +351,17 @@ function getGoogleAvatar(user) {
     if (user && user.photoURL && user.photoURL !== '' && !user.photoURL.includes('gstatic.com')) {
         return user.photoURL;
     }
-    const name = (user && user.displayName) ? user.displayName : "User";
+    const name = (user && user.displayName) ? user.displayName : (user.isAnonymous ? "Guest" : "User");
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff&rounded=true`;
 }
 
 googleLoginBtn.addEventListener('click', () => {
     signInWithPopup(auth, provider).catch((error) => console.error("Lỗi đăng nhập:", error));
+});
+
+// Xử lý sự kiện đăng nhập ẩn danh (Khách)
+guestLoginBtn.addEventListener('click', () => {
+    signInAnonymously(auth).catch((error) => console.error("Lỗi đăng nhập khách:", error));
 });
 
 logoutBtn.addEventListener('click', () => {
@@ -366,7 +378,9 @@ onAuthStateChanged(auth, (user) => {
 
         const isAdmin = user.email === ADMIN_EMAIL;
         const custom = getCustomProfile(user.uid);
-        const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : user.displayName);
+        
+        let defaultName = user.isAnonymous ? ("Guest_" + user.uid.substring(0, 4)) : user.displayName;
+        const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : defaultName);
         const avatarUrl = custom ? custom.avatar : getGoogleAvatar(user);
 
         userDisplayName.innerHTML = `
@@ -391,12 +405,13 @@ function sendMessage() {
     if (message !== '' && currentUser && currentMessagesRef) {
         const isAdmin = currentUser.email === ADMIN_EMAIL;
         const custom = getCustomProfile(currentUser.uid);
-        const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : (currentUser.displayName || "User"));
+        let defaultName = currentUser.isAnonymous ? ("Guest_" + currentUser.uid.substring(0, 4)) : (currentUser.displayName || "User");
+        const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : defaultName);
         const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
         push(currentMessagesRef, {
             uid: currentUser.uid,
-            email: currentUser.email,
+            email: currentUser.email || 'guest@system.com',
             username: displayName,
             avatar: avatarUrl,
             text: message,
@@ -436,12 +451,13 @@ imageInput.addEventListener('change', async (e) => {
             const imageUrl = result.data.display_url || result.data.url;
             const isAdmin = currentUser.email === ADMIN_EMAIL;
             const custom = getCustomProfile(currentUser.uid);
-            const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : (currentUser.displayName || "User"));
+            let defaultName = currentUser.isAnonymous ? ("Guest_" + currentUser.uid.substring(0, 4)) : (currentUser.displayName || "User");
+            const displayName = custom ? custom.name : (isAdmin ? "Út Gà" : defaultName);
             const avatarUrl = custom ? custom.avatar : getGoogleAvatar(currentUser);
 
             push(currentMessagesRef, {
                 uid: currentUser.uid,
-                email: currentUser.email,
+                email: currentUser.email || 'guest@system.com',
                 username: displayName,
                 avatar: avatarUrl,
                 text: '',

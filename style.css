@@ -349,3 +349,26 @@ button#sendBtn {
 .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
 .modal-save-btn { flex: 1; background: #0084ff; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .modal-close-btn { flex: 1; background: #ccc; color: #333; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+/* (Bổ sung thêm đoạn này vào cuối file style.css) */
+.guest-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #0084ff;
+    background: #f0f8ff;
+    color: #0084ff;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.guest-btn:hover {
+    background: #e1f0ff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
